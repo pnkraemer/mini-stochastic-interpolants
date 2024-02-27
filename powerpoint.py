@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def generate_m(num_points=100, width=1):
+def generate_m(num_points, width):
     left_vertical = distribute_points_around_line(
         np.array([1, 1]), np.array([1, 9]), num_points // 4, width
     )
@@ -17,7 +17,7 @@ def generate_m(num_points=100, width=1):
     return np.hstack((left_vertical, middle_to_top, middle_to_bottom, right_vertical))
 
 
-def generate_a(num_points=100, width=1):
+def generate_a(num_points, width):
     left_slant = distribute_points_around_line(
         np.array([4.5, 1]), np.array([5.5, 9]), num_points // 3, width
     )
@@ -30,7 +30,7 @@ def generate_a(num_points=100, width=1):
     return np.hstack((left_slant, right_slant, cross_bar))
 
 
-def generate_r(num_points=100, width=1):
+def generate_r(num_points, width):
     vertical_line = distribute_points_around_line(
         np.array([7, 1]), np.array([7, 9]), num_points // 3, width
     )
@@ -44,7 +44,7 @@ def generate_r(num_points=100, width=1):
 
 
 # Adjusting positions for "C" and "O" for the word "MARCO"
-def generate_c(num_points=100, width=1):
+def generate_c(num_points, width):
     return (
         distribute_points_around_circle(
             np.array([11.5, 5]), 2, 90, 270, num_points, width
@@ -54,7 +54,7 @@ def generate_c(num_points=100, width=1):
     )
 
 
-def generate_o(num_points=100, width=1):
+def generate_o(num_points, width):
     return (
         distribute_points_around_circle(np.array([14, 5]), 2, 0, 360, num_points, width)
         * np.array([1, 2])[..., None]
@@ -62,25 +62,25 @@ def generate_o(num_points=100, width=1):
     )
 
 
-def generate_n(num_points_per_letter, width):
+def generate_n(num_points, width):
     return np.hstack(
         [
             distribute_points_around_line(
-                np.array([5, 9]), np.array([5, 1]), num_points_per_letter // 3, width
+                np.array([5, 9]), np.array([5, 1]), num_points // 3, width
             ),
             distribute_points_around_line(
-                np.array([5, 9]), np.array([7, 1]), num_points_per_letter // 3, width
+                np.array([5, 9]), np.array([7, 1]), num_points // 3, width
             ),
             distribute_points_around_line(
-                np.array([7, 1]), np.array([7, 9]), num_points_per_letter // 3, width
+                np.array([7, 1]), np.array([7, 9]), num_points // 3, width
             ),
         ]
     )
 
 
-def generate_i(num_points_per_letter, width):
+def generate_i(num_points, width):
     return distribute_points_around_line(
-        np.array([8.5, 1]), np.array([8.5, 9]), num_points_per_letter, width
+        np.array([8.5, 1]), np.array([8.5, 9]), num_points, width
     )
 
 
