@@ -66,13 +66,13 @@ def generate_n(num_points_per_letter, width):
     return np.hstack(
         [
             distribute_points_around_line(
-                np.array([1, 9]), np.array([1, 1]), num_points_per_letter // 3, width
+                np.array([5, 9]), np.array([5, 1]), num_points_per_letter // 3, width
             ),
             distribute_points_around_line(
-                np.array([1, 9]), np.array([3, 1]), num_points_per_letter // 3, width
+                np.array([5, 9]), np.array([7, 1]), num_points_per_letter // 3, width
             ),
             distribute_points_around_line(
-                np.array([3, 1]), np.array([3, 9]), num_points_per_letter // 3, width
+                np.array([7, 1]), np.array([7, 9]), num_points_per_letter // 3, width
             ),
         ]
     )
@@ -80,7 +80,7 @@ def generate_n(num_points_per_letter, width):
 
 def generate_i(num_points_per_letter, width):
     return distribute_points_around_line(
-        np.array([4.5, 1]), np.array([4.5, 9]), num_points_per_letter, width
+        np.array([8.5, 1]), np.array([8.5, 9]), num_points_per_letter, width
     )
 
 

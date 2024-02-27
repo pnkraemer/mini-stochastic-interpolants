@@ -31,8 +31,6 @@ all_points_nico = np.hstack(
 fig, (axes_marco, axes_nico) = plt.subplots(ncols=2)
 axes_marco.scatter(all_points_marco[0], all_points_marco[1], s=1)
 axes_nico.scatter(all_points_nico[0], all_points_nico[1], s=1)
-plt.title('Distribution Resembling the Word "MARCO"')
-plt.gca().set_aspect("equal", adjustable="box")
 plt.show()
 
 
