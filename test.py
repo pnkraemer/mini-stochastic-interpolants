@@ -29,27 +29,27 @@ prng_key = jax.random.PRNGKey(1)
 
 # Set up the problem: sample from mixtures of Gaussians
 
-
+x_shape = (1,)
 def sample_from_mean(key, *, mean):
     key_idx, key_g = jax.random.split(key, num=2)
     idx = jax.random.choice(key_idx, jnp.arange(0, len(mean), step=1))
-    return jax.random.normal(key_g, shape=()) + mean[idx]
+    return jax.random.normal(key_g, shape=x_shape) + mean[idx]
 
 
-m0 = jnp.asarray([-10, 0, 10])
-m1 = jnp.asarray([-5, 5])
+m0 = jnp.asarray([[-10], [0], [10]])
+m1 = jnp.asarray([[-5], [5]])
 sample_rho0 = functools.partial(sample_from_mean, mean=m0)
 sample_rho1 = functools.partial(sample_from_mean, mean=m1)
 
 
 model_b = imports.MLP(
-    output_dim=1,
+    output_dim=x_shape[0],
     num_layers=2,
     hidden_dim=10,
     act_fn=jax.nn.tanh,
 )
 model_s = imports.MLP(
-    output_dim=1,
+    output_dim=x_shape[0],
     num_layers=2,
     hidden_dim=10,
     act_fn=jax.nn.tanh,
@@ -60,18 +60,18 @@ model_s = imports.MLP(
 
 
 def b_parametrized(t, x, p):
-    t_and_x = jnp.asarray([[t, x]])
-    return model_b.apply(p, t_and_x).reshape(())
+    t_and_x = jnp.concatenate([t[None], x.reshape((-1,))])[None, ...]
+    return model_b.apply(p, t_and_x).reshape(x_shape)
 
 
 def s_parametrized(t, x, p):
-    t_and_x = jnp.asarray([[t, x]])
-    return model_s.apply(p, t_and_x).reshape(())
+    t_and_x = jnp.concatenate([t[None], x.reshape((-1,))])[None, ...]
+    return model_s.apply(p, t_and_x).reshape(x_shape)
 
 
 # Initialize the model parameters
 
-t_and_x_like = jnp.asarray([[2.0, 3.0]])
+t_and_x_like = jnp.concatenate([jnp.zeros((1,)), jnp.zeros(x_shape).reshape((-1,))])[None, ...]
 prng_key_b, prng_key_s, prng_key = jax.random.split(prng_key, num=3)
 params_b = model_b.init(prng_key_b, t_and_x_like)
 params_s = model_s.init(prng_key_s, t_and_x_like)
@@ -107,11 +107,17 @@ loss_s = imports.make_loss_s(
 
 # todo: make these four lines a bit less horrible
 
-loss_b_vmapped = jax.vmap(loss_b, in_axes=(0, None))
-loss_s_vmapped = jax.vmap(loss_s, in_axes=(0, None))
+def loss_b_eval(*a, **kw): 
+    loss_b_vmapped = jax.vmap(loss_b, in_axes=(0, None))
+    loss_b_per_sample = loss_b_vmapped(*a, **kw)
+    return jnp.mean(loss_b_per_sample, axis=0)
 
-loss_b_eval = lambda *a, **kw: jnp.mean(loss_b_vmapped(*a, **kw))
-loss_s_eval = lambda *a, **kw: jnp.mean(loss_s_vmapped(*a, **kw))
+
+def loss_s_eval(*a, **kw): 
+    loss_s_vmapped = jax.vmap(loss_s, in_axes=(0, None))
+    loss_s_per_sample = loss_s_vmapped(*a, **kw)
+    return jnp.mean(loss_s_per_sample, axis=0)
+
 
 
 # Set up an optimizer and optimize b
@@ -190,7 +196,7 @@ x0s = jax.vmap(sample_rho0)(keys_init_x0s)
 
 
 # Plot the results
-plt.plot(t_trajectories, x1_trajectories.T, color="black", alpha=0.2)
+plt.plot(t_trajectories, x1_trajectories[:, :, 0].T, color="black", alpha=0.2)
 plt.show()
 
 
@@ -203,8 +209,9 @@ def f(log_epsilon, /):
         imports.solve_sde, dt=dt, b=b, s=s, epsilon_const=epsilon
     )
     trajectories = jax.vmap(simulate_sde, out_axes=(None, 0))(x0s, keys_sde)
+    # shape (num_generate, num_timesteps, num_x_dim)
     (t_trajectories, x1_trajectories) = trajectories
-    return t_trajectories, x1_trajectories.T
+    return t_trajectories, x1_trajectories[:, :, 0].T
 
 
 imports.slider(f, 0.0, name="log - Universal attention transport constant")
