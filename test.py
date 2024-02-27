@@ -11,7 +11,7 @@ import tqdm
 import imports
 
 # Training parameters
-num_samples = 1_000
+num_samples = 100
 num_epochs_b = 100_000
 num_epochs_s = 100_000
 learning_rate_b = 0.01
@@ -45,13 +45,13 @@ sample_rho1 = functools.partial(sample_from_mean, mean=m1)
 model_b = imports.MLP(
     output_dim=x_shape[0],
     num_layers=2,
-    hidden_dim=10,
+    hidden_dim=20,
     act_fn=jax.nn.tanh,
 )
 model_s = imports.MLP(
     output_dim=x_shape[0],
     num_layers=2,
-    hidden_dim=10,
+    hidden_dim=20,
     act_fn=jax.nn.tanh,
 )
 
@@ -186,7 +186,7 @@ prng_key_init_x0s, prng_key_sde, prng_key = jax.random.split(prng_key, num=3)
 keys_init_x0s = jax.random.split(prng_key_init_x0s, num=num_generates)
 keys_sde = jax.random.split(prng_key_sde, num_generates)
 simulate_sde_single = functools.partial(
-    imports.solve_sde, dt=dt, b=b, s=s, epsilon_const=0.0
+    imports.solve_sde, dt=dt, b=b, s=s, epsilon_const=1.0
 )
 simulate_sde = jax.vmap(simulate_sde_single, out_axes=(None, 0))
 
@@ -198,6 +198,7 @@ x0s = jax.vmap(sample_rho0)(keys_init_x0s)
 # Plot the results
 plt.plot(t_trajectories, x1_trajectories[:, :, 0].T, color="black", alpha=0.2)
 plt.show()
+plt.savefig("traj.png")
 
 
 # Slider time

@@ -4,3 +4,4 @@ flax==0.7.5
 optax==0.1.7
 matplotlib
 tqdm
+imageio
