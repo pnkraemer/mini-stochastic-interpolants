@@ -50,13 +50,13 @@ def _get_loss_b_pointwise(
 
         term_one = 0.5 * jnp.dot(b_eval, b_eval)
 
-        big_i_deriv_eval = big_i_deriv(t, x_init, x_final) 
+        big_i_deriv_eval = big_i_deriv(t, x_init, x_final)
         gamma_deriv_eval = gamma_deriv(t)
 
         assert jnp.shape(big_i_deriv_eval) == jnp.shape(x_init)
         assert jnp.shape(z) == jnp.shape(x_init)
 
-        term_two = jnp.dot(big_i_deriv_eval+ gamma_deriv_eval * z, b_eval)
+        term_two = jnp.dot(big_i_deriv_eval + gamma_deriv_eval * z, b_eval)
         return term_one - term_two
 
     return loss_b_pointwise
@@ -147,7 +147,6 @@ def _get_loss_s_pointwise_antithetic(
         # Repeat with x_init, x_final, -z
         x_t = big_i(t, x_init, x_final) + gamma(t) * (-z)
         s_eval = s_parametrized(t, x_t, params)
-
 
         term_one = 0.5 * jnp.dot(s_eval, s_eval)
         term_two = jnp.dot(1.0 / gamma(t) * (-z), s_eval)
@@ -245,6 +244,7 @@ class MLP(flax.linen.Module):
             x = self.act_fn(x)
         x = flax.linen.Dense(self.output_dim)(x)
         return x
+
 
 class Transformer(flax.linen.Module):
     @flax.linen.compact

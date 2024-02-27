@@ -30,6 +30,8 @@ prng_key = jax.random.PRNGKey(1)
 # Set up the problem: sample from mixtures of Gaussians
 
 x_shape = (1,)
+
+
 def sample_from_mean(key, *, mean):
     key_idx, key_g = jax.random.split(key, num=2)
     idx = jax.random.choice(key_idx, jnp.arange(0, len(mean), step=1))
@@ -71,7 +73,9 @@ def s_parametrized(t, x, p):
 
 # Initialize the model parameters
 
-t_and_x_like = jnp.concatenate([jnp.zeros((1,)), jnp.zeros(x_shape).reshape((-1,))])[None, ...]
+t_and_x_like = jnp.concatenate([jnp.zeros((1,)), jnp.zeros(x_shape).reshape((-1,))])[
+    None, ...
+]
 prng_key_b, prng_key_s, prng_key = jax.random.split(prng_key, num=3)
 params_b = model_b.init(prng_key_b, t_and_x_like)
 params_s = model_s.init(prng_key_s, t_and_x_like)
@@ -107,17 +111,17 @@ loss_s = imports.make_loss_s(
 
 # todo: make these four lines a bit less horrible
 
-def loss_b_eval(*a, **kw): 
+
+def loss_b_eval(*a, **kw):
     loss_b_vmapped = jax.vmap(loss_b, in_axes=(0, None))
     loss_b_per_sample = loss_b_vmapped(*a, **kw)
     return jnp.mean(loss_b_per_sample, axis=0)
 
 
-def loss_s_eval(*a, **kw): 
+def loss_s_eval(*a, **kw):
     loss_s_vmapped = jax.vmap(loss_s, in_axes=(0, None))
     loss_s_per_sample = loss_s_vmapped(*a, **kw)
     return jnp.mean(loss_s_per_sample, axis=0)
-
 
 
 # Set up an optimizer and optimize b
