@@ -13,21 +13,21 @@ import imports
 import powerpoint
 
 # Training parameters
-num_samples = 100000
-num_epochs_b = 10_000
-num_epochs_s = 10_000
-learning_rate_b = 0.001
-learning_rate_s = 0.001
+num_samples = 1_000_000 #100_000
+num_epochs_b = 100_000
+num_epochs_s = 100_000
+learning_rate_b = 0.01 #0.001
+learning_rate_s = 0.01 #0.001
 
 
 # Generation parameters
-num_generates = 1000
+num_generates = 10_000
 dt = 0.01
 epsilon = 0.1
 
 
 # The one and only magic key
-prng_key = jax.random.PRNGKey(1)
+prng_key = jax.random.PRNGKey(2)
 
 
 # Set up the problem: sample from mixtures of Gaussians
@@ -48,7 +48,7 @@ def sample_marco(key, *, width):
 
     idx = jax.random.choice(key, jnp.arange(0, 5, step=1))
     word = jnp.stack([marco_m_points, marco_a_points, marco_r_points, marco_c_points, marco_o_points], axis=0)
-    return word[0][..., 0]
+    return word[idx]
 
 
 def sample_nico(key, *, width):
@@ -63,22 +63,22 @@ def sample_nico(key, *, width):
 
     idx = jax.random.choice(key, jnp.arange(0, 4, step=1))
     word = jnp.stack([nico_n_points, nico_i_points, nico_c_points, nico_o_points], axis=0)
-    return word[0][..., 0]
+    return word[idx]
 
-sample_rho0 = functools.partial(sample_nico, width=0.25)
-sample_rho1 = functools.partial(sample_marco, width=0.25)
+sample_rho1 = functools.partial(sample_nico, width=0.25)
+sample_rho0 = functools.partial(sample_marco, width=0.25)
 
 
 model_b = imports.MLP(
     output_dim=x_shape[0],
     num_layers=2,
-    hidden_dim=20,
+    hidden_dim=40,
     act_fn=jax.nn.tanh,
 )
 model_s = imports.MLP(
     output_dim=x_shape[0],
     num_layers=2,
-    hidden_dim=20,
+    hidden_dim=40,
     act_fn=jax.nn.tanh,
 )
 
@@ -147,34 +147,6 @@ def loss_s_eval(*a, **kw):
 
 
 
-# Set up an optimizer and optimize b
-
-optimizer_b = optax.adam(learning_rate_b)
-opt_state_b = optimizer_b.init(params_b)
-step_b_nonjit = functools.partial(
-    imports.train_step,
-    loss=loss_b_eval,
-    model=model_b,
-    optimizer=optimizer_b,
-)
-step_b = jax.jit(step_b_nonjit)
-
-pbar = tqdm.tqdm(range(num_epochs_b))
-for epoch in pbar:
-    try:
-        #prng_key, _ = jax.random.split(prng_key, num=2)
-        keys_b_all = jax.random.split(prng_key, num=num_samples)
-
-        params_b, opt_state_b, loss_value_b = step_b(
-            params=params_b,
-            opt_state=opt_state_b,
-            list_of_keys=keys_b_all,
-        )
-        pbar.set_description(f"Loss (b): {loss_value_b:.3f}")
-    except KeyboardInterrupt:
-        break
-
-
 # Set up an optimizer and optimize s
 
 
@@ -191,7 +163,8 @@ step_s = jax.jit(step_s_nonjit)
 pbar = tqdm.tqdm(range(num_epochs_s))
 for epoch in pbar:
     try:
-        #prng_key, _ = jax.random.split(prng_key, num=2)
+        if epoch % 1000 == 0:
+            prng_key, _ = jax.random.split(prng_key, num=2)
         keys_s_all = jax.random.split(prng_key, num=num_samples)
         params_s, opt_state_s, loss_value_s = step_s(
             params=params_s,
@@ -201,6 +174,36 @@ for epoch in pbar:
         pbar.set_description(f"Loss (s): {loss_value_s:.3f}")
     except KeyboardInterrupt:
         break
+
+
+# Set up an optimizer and optimize b
+
+optimizer_b = optax.adam(learning_rate_b)
+opt_state_b = optimizer_b.init(params_b)
+step_b_nonjit = functools.partial(
+    imports.train_step,
+    loss=loss_b_eval,
+    model=model_b,
+    optimizer=optimizer_b,
+)
+step_b = jax.jit(step_b_nonjit)
+
+pbar = tqdm.tqdm(range(num_epochs_b))
+for epoch in pbar:
+    try:
+        if epoch % 1000 == 0:
+            prng_key, _ = jax.random.split(prng_key, num=2)
+        keys_b_all = jax.random.split(prng_key, num=num_samples)
+
+        params_b, opt_state_b, loss_value_b = step_b(
+            params=params_b,
+            opt_state=opt_state_b,
+            list_of_keys=keys_b_all,
+        )
+        pbar.set_description(f"Loss (b): {loss_value_b:.3f}")
+    except KeyboardInterrupt:
+        break
+
 
 # Fix the optimized parameters
 
@@ -231,7 +234,7 @@ pbar = tqdm.tqdm(range(int(1./dt)))
 for i in pbar:
     plt.figure()
     plt.scatter(x1_trajectories[:, i, 0], x1_trajectories[:, i, 1], color="black", alpha=1, s=1)
-    plt.xlim([0,10])
+    plt.xlim([0,17])
     plt.ylim([0,10])
     plt.savefig(f"figures/step{i}.png")
     plt.close()

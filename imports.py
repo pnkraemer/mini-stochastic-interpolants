@@ -15,7 +15,10 @@ def make_loss_b(*, big_i, gamma, b_parametrized, sample_rho0, sample_rho1):
 
         x0 = sample_rho0(key_0)
         x1 = sample_rho1(key_1)
-        t = jax.random.uniform(key_t, shape=())
+        
+        shift = jnp.finfo(jnp.dtype(x1)).eps * 100
+
+        t = jax.random.uniform(key_t, shape=())*(1 - 2*shift)+shift
         z = jax.random.normal(key_z, shape=x0.shape)
 
         loss_b_pointwise = _get_loss_b_pointwise(
@@ -68,7 +71,10 @@ def make_loss_s(*, big_i, gamma, s_parametrized, sample_rho0, sample_rho1):
 
         x0 = sample_rho0(key_0)
         x1 = sample_rho1(key_1)
-        t = jax.random.uniform(key_t, shape=())
+
+        shift = jnp.finfo(jnp.dtype(x1)).eps * 100
+
+        t = jax.random.uniform(key_t, shape=())*(1 - 2*shift)+shift
         z = jax.random.normal(key_z, shape=x0.shape)
 
         loss_s_pointwise = _get_loss_s_pointwise(
