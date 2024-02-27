@@ -3,37 +3,58 @@ import jax.numpy as jnp
 
 import powerpoint
 import jax 
-num_points_per_letter = 10_000
-width = 0.5
-key = jax.random.PRNGKey(1)
 
-m, a, r, c, o, n, i, c_, o_ = jax.random.split(key, num=9)
+# m, a, r, c, o, n, i, c_, o_ = jax.random.split(key, num=9)
 
-# Generate points for each letter with adjusted parameters
-marco_m_points = powerpoint.generate_m(m, num_points_per_letter, width)
-marco_a_points = powerpoint.generate_a(a, num_points_per_letter, width)
-marco_r_points = powerpoint.generate_r(r, num_points_per_letter, width)
-marco_c_points = powerpoint.generate_c(c, num_points_per_letter, width)
-marco_o_points = powerpoint.generate_o(o, num_points_per_letter, width)
+width = 0.25
+
+@jax.vmap
+def sample_marco(key):
+    m, a, r, c, o, key_idx = jax.random.split(key, num=6)
+
+    # Generate points for each letter with adjusted parameters
+    marco_m_points = powerpoint.generate_m(m, width)
+    marco_a_points = powerpoint.generate_a(a, width)
+    marco_r_points = powerpoint.generate_r(r, width)
+    marco_c_points = powerpoint.generate_c(c, width)
+    marco_o_points = powerpoint.generate_o(o, width)
 
 
-nico_n_points = powerpoint.generate_n(n, num_points_per_letter, width)
-nico_i_points = powerpoint.generate_i(i, num_points_per_letter, width)
-nico_c_points = powerpoint.generate_c(c_, num_points_per_letter, width)
-nico_o_points = powerpoint.generate_o(o_, num_points_per_letter, width)
+    idx = jax.random.choice(key, jnp.arange(0, 5, step=1))
+    word = jnp.stack([marco_m_points, marco_a_points, marco_r_points, marco_c_points, marco_o_points], axis=0)
+    return word[idx][..., 0]
+
+@jax.vmap
+def sample_nico(key):
+    n, i, c, o, key_idx = jax.random.split(key, num=5)
+
+    # Generate points for each letter with adjusted parameters
+    nico_n_points = powerpoint.generate_n(n, width)
+    nico_i_points = powerpoint.generate_i(i, width)
+    nico_c_points = powerpoint.generate_c(c, width)
+    nico_o_points = powerpoint.generate_o(o, width)
+
+
+    idx = jax.random.choice(key, jnp.arange(0, 4, step=1))
+    word = jnp.stack([nico_n_points, nico_i_points, nico_c_points, nico_o_points], axis=0)
+    return word[idx][..., 0]
+
+
+# nico_n_points = powerpoint.generate_n(n, num_points_per_letter, width)
+# nico_i_points = powerpoint.generate_i(i, num_points_per_letter, width)
+# nico_c_points = powerpoint.generate_c(c_, num_points_per_letter, width)
+# nico_o_points = powerpoint.generate_o(o_, num_points_per_letter, width)
 
 
 # Combine all points
-all_points_marco = jnp.hstack(
-    (marco_m_points, marco_a_points, marco_r_points, marco_c_points, marco_o_points)
-)
-all_points_nico = jnp.hstack(
-    (nico_n_points, nico_i_points, nico_c_points, nico_o_points)
-)
+key_ = jax.random.PRNGKey(1)
+all_points_marco = sample_marco(jax.random.split(key_, num=100_000))
+all_points_nico = sample_nico(jax.random.split(key_, num=100_000))
+
 
 fig, (axes_marco, axes_nico) = plt.subplots(ncols=2)
-axes_marco.scatter(all_points_marco[0], all_points_marco[1], s=1)
-axes_nico.scatter(all_points_nico[0], all_points_nico[1], s=1)
+axes_marco.scatter(all_points_marco[:, 0], all_points_marco[:, 1], s=1)
+axes_nico.scatter(all_points_nico[:, 0], all_points_nico[:, 1], s=1)
 plt.show()
 
 
