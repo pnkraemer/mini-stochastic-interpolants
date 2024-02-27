@@ -2,21 +2,25 @@ import matplotlib.pyplot as plt
 import jax.numpy as jnp 
 
 import powerpoint
-
+import jax 
 num_points_per_letter = 10_000
 width = 0.5
+key = jax.random.PRNGKey(1)
+
+m, a, r, c, o, n, i, c_, o_ = jax.random.split(key, num=9)
+
 # Generate points for each letter with adjusted parameters
-marco_m_points = powerpoint.generate_m(num_points_per_letter, width)
-marco_a_points = powerpoint.generate_a(num_points_per_letter, width)
-marco_r_points = powerpoint.generate_r(num_points_per_letter, width)
-marco_c_points = powerpoint.generate_c(num_points_per_letter, width)
-marco_o_points = powerpoint.generate_o(num_points_per_letter, width)
+marco_m_points = powerpoint.generate_m(m, num_points_per_letter, width)
+marco_a_points = powerpoint.generate_a(a, num_points_per_letter, width)
+marco_r_points = powerpoint.generate_r(r, num_points_per_letter, width)
+marco_c_points = powerpoint.generate_c(c, num_points_per_letter, width)
+marco_o_points = powerpoint.generate_o(o, num_points_per_letter, width)
 
 
-nico_n_points = powerpoint.generate_n(num_points_per_letter, width)
-nico_i_points = powerpoint.generate_i(num_points_per_letter, width)
-nico_c_points = powerpoint.generate_c(num_points_per_letter, width)
-nico_o_points = powerpoint.generate_o(num_points_per_letter, width)
+nico_n_points = powerpoint.generate_n(n, num_points_per_letter, width)
+nico_i_points = powerpoint.generate_i(i, num_points_per_letter, width)
+nico_c_points = powerpoint.generate_c(c_, num_points_per_letter, width)
+nico_o_points = powerpoint.generate_o(o_, num_points_per_letter, width)
 
 
 # Combine all points
