@@ -13,11 +13,11 @@ import imports
 import powerpoint
 
 # Training parameters
-num_samples = 1_000_000 #100_000
+num_samples = 1_000_000  # 100_000
 num_epochs_b = 100_000
 num_epochs_s = 100_000
-learning_rate_b = 0.01 #0.001
-learning_rate_s = 0.01 #0.001
+learning_rate_b = 0.01  # 0.001
+learning_rate_s = 0.01  # 0.001
 
 
 # Generation parameters
@@ -45,9 +45,17 @@ def sample_marco(key, *, width):
     marco_c_points = powerpoint.generate_c(c, width)
     marco_o_points = powerpoint.generate_o(o, width)
 
-
     idx = jax.random.choice(key, jnp.arange(0, 5, step=1))
-    word = jnp.stack([marco_m_points, marco_a_points, marco_r_points, marco_c_points, marco_o_points], axis=0)
+    word = jnp.stack(
+        [
+            marco_m_points,
+            marco_a_points,
+            marco_r_points,
+            marco_c_points,
+            marco_o_points,
+        ],
+        axis=0,
+    )
     return word[idx]
 
 
@@ -60,10 +68,12 @@ def sample_nico(key, *, width):
     nico_c_points = powerpoint.generate_c(c, width)
     nico_o_points = powerpoint.generate_o(o, width)
 
-
     idx = jax.random.choice(key, jnp.arange(0, 4, step=1))
-    word = jnp.stack([nico_n_points, nico_i_points, nico_c_points, nico_o_points], axis=0)
+    word = jnp.stack(
+        [nico_n_points, nico_i_points, nico_c_points, nico_o_points], axis=0
+    )
     return word[idx]
+
 
 sample_rho1 = functools.partial(sample_nico, width=0.25)
 sample_rho0 = functools.partial(sample_marco, width=0.25)
@@ -98,7 +108,9 @@ def s_parametrized(t, x, p):
 
 # Initialize the model parameters
 
-t_and_x_like = jnp.concatenate([jnp.zeros((1,)), jnp.zeros(x_shape).reshape((-1,))])[None, ...]
+t_and_x_like = jnp.concatenate([jnp.zeros((1,)), jnp.zeros(x_shape).reshape((-1,))])[
+    None, ...
+]
 prng_key_b, prng_key_s, prng_key = jax.random.split(prng_key, num=3)
 params_b = model_b.init(prng_key_b, t_and_x_like)
 params_s = model_s.init(prng_key_s, t_and_x_like)
@@ -134,17 +146,17 @@ loss_s = imports.make_loss_s(
 
 # todo: make these four lines a bit less horrible
 
-def loss_b_eval(*a, **kw): 
+
+def loss_b_eval(*a, **kw):
     loss_b_vmapped = jax.vmap(loss_b, in_axes=(0, None))
     loss_b_per_sample = loss_b_vmapped(*a, **kw)
     return jnp.mean(loss_b_per_sample, axis=0)
 
 
-def loss_s_eval(*a, **kw): 
+def loss_s_eval(*a, **kw):
     loss_s_vmapped = jax.vmap(loss_s, in_axes=(0, None))
     loss_s_per_sample = loss_s_vmapped(*a, **kw)
     return jnp.mean(loss_s_per_sample, axis=0)
-
 
 
 # Set up an optimizer and optimize s
@@ -230,20 +242,22 @@ plt.scatter(x0s[:, 0], x0s[:, 1], s=2)
 plt.scatter(x1_trajectories[:, -1, 0], x1_trajectories[:, -1, 1], s=2)
 plt.savefig("x1s.png")
 
-pbar = tqdm.tqdm(range(int(1./dt)))
+pbar = tqdm.tqdm(range(int(1.0 / dt)))
 for i in pbar:
     plt.figure()
-    plt.scatter(x1_trajectories[:, i, 0], x1_trajectories[:, i, 1], color="black", alpha=1, s=1)
-    plt.xlim([0,17])
-    plt.ylim([0,10])
+    plt.scatter(
+        x1_trajectories[:, i, 0], x1_trajectories[:, i, 1], color="black", alpha=1, s=1
+    )
+    plt.xlim([0, 17])
+    plt.ylim([0, 10])
     plt.savefig(f"figures/step{i}.png")
     plt.close()
     pbar.set_description(f"Plotting frame {i+1}/{int(1./dt)}")
 
 images = []
-for i in range(int(1./dt)):
+for i in range(int(1.0 / dt)):
     filename = f"figures/step{i}.png"
     images.append(imageio.v2.imread(filename))
-imageio.mimsave('animation.gif', images, duration=2)
+imageio.mimsave("animation.gif", images, duration=2)
 
 print("Boomshakalaka")
