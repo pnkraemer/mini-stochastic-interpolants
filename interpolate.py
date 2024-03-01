@@ -86,8 +86,8 @@ sample_rho0 = functools.partial(sample_marco, width=0.25)
 
 model_b = imports.MLP(
     output_dim=1,
-    num_layers=1,
-    hidden_dim=100,
+    num_layers=2,
+    hidden_dim=3,
     act_fn=jax.nn.relu,
 )
 
@@ -121,7 +121,8 @@ opt_state_b = optimizer_b.init(params_b)
 pbar = tqdm.tqdm(range(num_epochs_b))
 for epoch in pbar:
     try:
-        prng_key, _ = jax.random.split(prng_key, num=2)
+        if epoch % 10000 == 0:
+            prng_key, _ = jax.random.split(prng_key, num=2)
         batch = jax.random.choice(prng_key, jnp.arange(0, len(inputs)), shape=(batch_size,), replace=False )
         ret, grads = jax.value_and_grad(mse, argnums=0)(params_b, inputs[batch], outputs[batch])
         params_update, opt_state_b = optimizer_b.update(grads, opt_state_b)

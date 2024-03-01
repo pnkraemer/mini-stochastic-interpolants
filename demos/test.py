@@ -168,7 +168,9 @@ step_s = jax.jit(step_s_nonjit)
 pbar = tqdm.tqdm(range(num_epochs_s))
 for epoch in pbar:
     try:
-        prng_key, _ = jax.random.split(prng_key, num=2)
+        if epoch % 1_000 == 0:
+            prng_key, _ = jax.random.split(prng_key, num=2)
+
         keys_s_all = jax.random.split(prng_key, num=num_samples)
         params_s, opt_state_s, loss_value_s = step_s(
             params=params_s,
