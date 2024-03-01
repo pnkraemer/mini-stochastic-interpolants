@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import optax
 import tqdm
 
-import imports
+import stochint.losses
 
 # Training parameters
 num_samples = 100
@@ -44,21 +44,21 @@ sample_rho0 = functools.partial(sample_from_mean, mean=m0)
 sample_rho1 = functools.partial(sample_from_mean, mean=m1)
 
 
-model_b = imports.MLP(
+model_b = stochint.losses.MLP(
     output_dim=x_shape[0],
     num_layers=2,
     hidden_dim=20,
     act_fn=jax.nn.tanh,
 )
-model_s = imports.MLP(
+model_s = stochint.losses.MLP(
     output_dim=x_shape[0],
     num_layers=2,
     hidden_dim=20,
     act_fn=jax.nn.tanh,
 )
 
-# model_b = imports.Transformer()
-# model_s = imports.Transformer()
+# model_b = stochint.losses.Transformer()
+# model_s = stochint.losses.Transformer()
 
 
 def b_parametrized(t, x, p):
@@ -93,14 +93,14 @@ def gamma(t):
     return jnp.sqrt(alpha * t * (1 - t))
 
 
-loss_b = imports.make_loss_b(
+loss_b = stochint.losses.make_loss_b(
     big_i=big_i,
     gamma=gamma,
     b_parametrized=b_parametrized,
     sample_rho0=sample_rho0,
     sample_rho1=sample_rho1,
 )
-loss_s = imports.make_loss_s(
+loss_s = stochint.losses.make_loss_s(
     big_i=big_i,
     gamma=gamma,
     s_parametrized=s_parametrized,
@@ -129,7 +129,7 @@ def loss_s_eval(*a, **kw):
 optimizer_b = optax.adam(learning_rate_b)
 opt_state_b = optimizer_b.init(params_b)
 step_b_nonjit = functools.partial(
-    imports.train_step,
+    stochint.losses.train_step,
     loss=loss_b_eval,
     model=model_b,
     optimizer=optimizer_b,
@@ -158,7 +158,7 @@ for epoch in pbar:
 optimizer_s = optax.adam(learning_rate_s)
 opt_state_s = optimizer_s.init(params_s)
 step_s_nonjit = functools.partial(
-    imports.train_step,
+    stochint.losses.train_step,
     loss=loss_s_eval,
     model=model_s,
     optimizer=optimizer_s,
@@ -192,7 +192,7 @@ prng_key_init_x0s, prng_key_sde, prng_key = jax.random.split(prng_key, num=3)
 keys_init_x0s = jax.random.split(prng_key_init_x0s, num=num_generates)
 keys_sde = jax.random.split(prng_key_sde, num_generates)
 simulate_sde_single = functools.partial(
-    imports.solve_sde, dt=dt, b=b, s=s, epsilon_const=1.0
+    stochint.losses.solve_sde, dt=dt, b=b, s=s, epsilon_const=1.0
 )
 simulate_sde = jax.vmap(simulate_sde_single, out_axes=(None, 0))
 
@@ -204,7 +204,7 @@ x0s = jax.vmap(sample_rho0)(keys_init_x0s)
 # Plot the results
 plt.plot(t_trajectories, x1_trajectories[:, :, 0].T, color="black", alpha=0.2)
 plt.show()
-plt.savefig("traj.png")
+plt.savefig("figures_and_animations/traj.png")
 
 
 # Slider time
@@ -213,7 +213,7 @@ plt.savefig("traj.png")
 def f(log_epsilon, /):
     epsilon = 10**log_epsilon
     simulate_sde = functools.partial(
-        imports.solve_sde, dt=dt, b=b, s=s, epsilon_const=epsilon
+        stochint.losses.solve_sde, dt=dt, b=b, s=s, epsilon_const=epsilon
     )
     trajectories = jax.vmap(simulate_sde, out_axes=(None, 0))(x0s, keys_sde)
     # shape (num_generate, num_timesteps, num_x_dim)
@@ -221,7 +221,7 @@ def f(log_epsilon, /):
     return t_trajectories, x1_trajectories[:, :, 0].T
 
 
-imports.slider(f, 0.0, name="log - Universal attention transport constant")
+stochint.losses.slider(f, 0.0, name="log - Universal attention transport constant")
 plt.show()
 
 print("Boomshakalaka")
