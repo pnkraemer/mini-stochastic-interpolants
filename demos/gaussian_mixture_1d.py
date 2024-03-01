@@ -204,7 +204,7 @@ x0s = jax.vmap(sample_rho0)(keys_init_x0s)
 # Plot the results
 plt.plot(t_trajectories, x1_trajectories[:, :, 0].T, color="black", alpha=0.2)
 plt.show()
-plt.savefig("figures_and_animations/traj.png")
+plt.savefig("figures_and_animations/gaussian_mixture_1d.png")
 
 
 # Slider time
