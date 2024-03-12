@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import jax.numpy as jnp
 
-import powerpoint
+from stochint import util_data
 import jax
 
 
@@ -13,11 +13,11 @@ def sample_marco(key):
     m, a, r, c, o, key_idx = jax.random.split(key, num=6)
 
     # Generate points for each letter with adjusted parameters
-    marco_m_points = powerpoint.generate_m(m, width)
-    marco_a_points = powerpoint.generate_a(a, width)
-    marco_r_points = powerpoint.generate_r(r, width)
-    marco_c_points = powerpoint.generate_c(c, width)
-    marco_o_points = powerpoint.generate_o(o, width)
+    marco_m_points = util_data.generate_m(m, width)
+    marco_a_points = util_data.generate_a(a, width)
+    marco_r_points = util_data.generate_r(r, width)
+    marco_c_points = util_data.generate_c(c, width)
+    marco_o_points = util_data.generate_o(o, width)
 
     idx = jax.random.choice(key, jnp.arange(0, 5, step=1))
     word = jnp.stack(
@@ -38,10 +38,10 @@ def sample_nico(key):
     n, i, c, o, key_idx = jax.random.split(key, num=5)
 
     # Generate points for each letter with adjusted parameters
-    nico_n_points = powerpoint.generate_n(n, width)
-    nico_i_points = powerpoint.generate_i(i, width)
-    nico_c_points = powerpoint.generate_c(c, width)
-    nico_o_points = powerpoint.generate_o(o, width)
+    nico_n_points = util_data.generate_n(n, width)
+    nico_i_points = util_data.generate_i(i, width)
+    nico_c_points = util_data.generate_c(c, width)
+    nico_o_points = util_data.generate_o(o, width)
 
     idx = jax.random.choice(key, jnp.arange(0, 4, step=1))
     word = jnp.stack(
@@ -50,10 +50,10 @@ def sample_nico(key):
     return word[idx]
 
 
-# nico_n_points = powerpoint.generate_n(n, num_points_per_letter, width)
-# nico_i_points = powerpoint.generate_i(i, num_points_per_letter, width)
-# nico_c_points = powerpoint.generate_c(c_, num_points_per_letter, width)
-# nico_o_points = powerpoint.generate_o(o_, num_points_per_letter, width)
+# nico_n_points = util_data.generate_n(n, num_points_per_letter, width)
+# nico_i_points = util_data.generate_i(i, num_points_per_letter, width)
+# nico_c_points = util_data.generate_c(c_, num_points_per_letter, width)
+# nico_o_points = util_data.generate_o(o_, num_points_per_letter, width)
 
 
 # Combine all points
