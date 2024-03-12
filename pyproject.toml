@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools"]  # REQUIRED if [build-system] table is used
+requires = ["setuptools", "setuptools_scm"]  # REQUIRED if [build-system] table is used
 # The name of the Python object that frontends will use to perform the build:
 build-backend = "setuptools.build_meta"  # If not defined, then legacy behavior can happen.
 
@@ -8,3 +8,7 @@ build-backend = "setuptools.build_meta"  # If not defined, then legacy behavior 
 name = "stochint"
 dynamic = ["version"]
 dependencies = ["optax", "flax", "matplotlib", "tqdm", "imageio"]
+
+
+[tool.setuptools_scm]
+version_file = "src/stochint/_version.py"
