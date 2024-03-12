@@ -2,15 +2,14 @@ import functools
 from typing import Callable
 
 import flax.linen
+import imageio
+import imports
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import optax
-import tqdm
-import imageio
-
-import imports
 import powerpoint
+import tqdm
 
 # Training parameters
 num_samples = 1_000_000  # 100_000

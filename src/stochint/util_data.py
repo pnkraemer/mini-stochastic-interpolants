@@ -1,6 +1,5 @@
-import jax.numpy as jnp
-
 import jax
+import jax.numpy as jnp
 
 
 def generate_m(key, width):

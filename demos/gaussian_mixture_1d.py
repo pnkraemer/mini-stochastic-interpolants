@@ -6,9 +6,8 @@ import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import optax
-import tqdm
-
 import stochint.losses
+import tqdm
 
 # Training parameters
 num_samples = 100

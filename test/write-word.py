@@ -1,9 +1,7 @@
-import matplotlib.pyplot as plt
-import jax.numpy as jnp
-
-from stochint import util_data
 import jax
-
+import jax.numpy as jnp
+import matplotlib.pyplot as plt
+from stochint import util_data
 
 width = 0.25
 

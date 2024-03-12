@@ -1,11 +1,10 @@
 from typing import Callable
 
+import flax.linen
 import jax
 import jax.numpy as jnp
-import optax
-
-import flax.linen
 import matplotlib.pyplot as plt
+import optax
 from matplotlib.widgets import Button, Slider
 
 
