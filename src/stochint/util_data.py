@@ -1,3 +1,5 @@
+"""Data-generation utilities."""
+
 import jax
 import jax.numpy as jnp
 

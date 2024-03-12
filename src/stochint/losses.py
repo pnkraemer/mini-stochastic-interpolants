@@ -1,3 +1,5 @@
+"""Loss functions for stochastic interpolants."""
+
 from typing import Callable
 
 import flax.linen
