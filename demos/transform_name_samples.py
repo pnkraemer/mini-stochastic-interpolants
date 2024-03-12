@@ -1,3 +1,5 @@
+"""Transform samples that write a name into samples that write a different name."""
+
 import functools
 from typing import Callable
 
