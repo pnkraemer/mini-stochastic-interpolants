@@ -3,23 +3,23 @@ from typing import Callable
 
 import flax.linen
 import imageio
-from stochint import losses, util_data
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import optax
 import tqdm
+from stochint import losses, util_data
 
 # Training parameters
-num_samples = 3  # 1_000_000
-num_epochs_b = 3   # 100_000
-num_epochs_s = 3   # 100_000
-learning_rate_b = 0.1   # 0.01
-learning_rate_s = 0.1   # 0.01
+num_samples = 1_000_000
+num_epochs_b = 100_000
+num_epochs_s = 100_000
+learning_rate_b = 0.01
+learning_rate_s = 0.01
 
 
 # Generation parameters
-num_generates = 10  # 10_000
+num_generates = 10_000
 dt = 0.01
 epsilon = 0.1
 
@@ -79,14 +79,14 @@ sample_rho0 = functools.partial(sample_marco, width=0.25)
 
 model_b = losses.MLP(
     output_dim=x_shape[0],
-    num_layers=2,   # 2
-    hidden_dim=5,  # 40
+    num_layers=2,
+    hidden_dim=40,
     act_fn=jax.nn.tanh,
 )
 model_s = losses.MLP(
     output_dim=x_shape[0],
-    num_layers=2,   # 2
-    hidden_dim=5,  # 40
+    num_layers=2,
+    hidden_dim=40,
     act_fn=jax.nn.tanh,
 )
 
@@ -102,10 +102,8 @@ def s_parametrized(t, x, p):
 
 
 # Initialize the model parameters
-
-t_and_x_like = jnp.concatenate([jnp.zeros((1,)), jnp.zeros(x_shape).reshape((-1,))])[
-    None, ...
-]
+t_and_x_like_flat = jnp.concatenate([jnp.zeros((1,)), jnp.zeros((jnp.size(x_shape),))])
+t_and_x_like = t_and_x_like_flat[None, ...]
 prng_key_b, prng_key_s, prng_key = jax.random.split(prng_key, num=3)
 params_b = model_b.init(prng_key_b, t_and_x_like)
 params_s = model_s.init(prng_key_s, t_and_x_like)
@@ -250,6 +248,8 @@ images = []
 for i in range(int(1.0 / dt)):
     filename = f"figures_and_animations/transform_name_samples/step{i}.png"
     images.append(imageio.v2.imread(filename))
-imageio.mimsave("figures_and_animations/transform_name_samples/animation.gif", images, duration=2)
+imageio.mimsave(
+    "figures_and_animations/transform_name_samples/animation.gif", images, duration=2
+)
 
 print("Boomshakalaka")

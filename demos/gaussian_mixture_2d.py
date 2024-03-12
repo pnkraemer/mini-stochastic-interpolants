@@ -3,12 +3,12 @@ from typing import Callable
 
 import flax.linen
 import imageio
-from stochint import losses
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import optax
 import tqdm
+from stochint import losses
 
 # Training parameters
 num_samples = 10
@@ -221,6 +221,8 @@ images = []
 for i in range(int(1.0 / dt)):
     filename = f"figures_and_animations/gaussian_mixture_2d/step{i}.png"
     images.append(imageio.v2.imread(filename))
-imageio.mimsave("figures_and_animations/gaussian_mixture_2d/animation.gif", images, duration=2)
+imageio.mimsave(
+    "figures_and_animations/gaussian_mixture_2d/animation.gif", images, duration=2
+)
 
 print("Boomshakalaka")
