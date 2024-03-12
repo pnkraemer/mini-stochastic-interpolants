@@ -163,13 +163,6 @@ def _get_loss_s_pointwise_antithetic(
     return loss_s_pointwise
 
 
-def train_step(*, list_of_keys, model, loss, params, opt_state, optimizer):
-    ret, grads = jax.value_and_grad(loss, argnums=1)(list_of_keys, params)
-    params_update, opt_state = optimizer.update(grads, opt_state)
-    params = optax.apply_updates(params, params_update)
-    return params, opt_state, ret
-
-
 def solve_ode(x0, *, b, dt):
     t = 0.0
     x = x0
@@ -235,27 +228,3 @@ def slider(fun, init_frequency, *, name):
 
     # register the update function with each slider
     freq_slider.on_changed(update)
-
-
-class MLP(flax.linen.Module):
-    act_fn: callable
-    output_dim: int
-    hidden_dim: int = 64
-    num_layers: int = 3
-
-    @flax.linen.compact
-    def __call__(self, x):
-        x = x.reshape((x.shape[0], -1))
-        for _ in range(self.num_layers):
-            x = flax.linen.Dense(self.hidden_dim)(x)
-            x = self.act_fn(x)
-        x = flax.linen.Dense(self.output_dim)(x)
-        return x
-
-
-class Transformer(flax.linen.Module):
-    @flax.linen.compact
-    def __call__(self, x):
-        x = flax.linen.MultiHeadDotProductAttention(num_heads=8, qkv_features=24)(x)
-        x = flax.linen.SelfAttention(num_heads=8, qkv_features=24)(x)
-        return jnp.sum(x)

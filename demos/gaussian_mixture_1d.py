@@ -9,6 +9,7 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import optax
 import stochint.losses
+import stochint.util_train
 import tqdm
 
 # Training parameters
@@ -45,21 +46,18 @@ sample_rho0 = functools.partial(sample_from_mean, mean=m0)
 sample_rho1 = functools.partial(sample_from_mean, mean=m1)
 
 
-model_b = stochint.losses.MLP(
+model_b = stochint.util_train.MLP(
     output_dim=x_shape[0],
     num_layers=2,
     hidden_dim=20,
     act_fn=jax.nn.tanh,
 )
-model_s = stochint.losses.MLP(
+model_s = stochint.util_train.MLP(
     output_dim=x_shape[0],
     num_layers=2,
     hidden_dim=20,
     act_fn=jax.nn.tanh,
 )
-
-# model_b = stochint.losses.Transformer()
-# model_s = stochint.losses.Transformer()
 
 
 def b_parametrized(t, x, p):
@@ -74,9 +72,8 @@ def s_parametrized(t, x, p):
 
 # Initialize the model parameters
 
-t_and_x_like = jnp.concatenate([jnp.zeros((1,)), jnp.zeros(x_shape).reshape((-1,))])[
-    None, ...
-]
+t_and_x_like_flat = jnp.concatenate([jnp.zeros((1,)), jnp.zeros((jnp.size(x_shape),))])
+t_and_x_like = t_and_x_like_flat[None, ...]
 prng_key_b, prng_key_s, prng_key = jax.random.split(prng_key, num=3)
 params_b = model_b.init(prng_key_b, t_and_x_like)
 params_s = model_s.init(prng_key_s, t_and_x_like)
@@ -130,7 +127,7 @@ def loss_s_eval(*a, **kw):
 optimizer_b = optax.adam(learning_rate_b)
 opt_state_b = optimizer_b.init(params_b)
 step_b_nonjit = functools.partial(
-    stochint.losses.train_step,
+    stochint.util_train.train_step,
     loss=loss_b_eval,
     model=model_b,
     optimizer=optimizer_b,
@@ -159,7 +156,7 @@ for epoch in pbar:
 optimizer_s = optax.adam(learning_rate_s)
 opt_state_s = optimizer_s.init(params_s)
 step_s_nonjit = functools.partial(
-    stochint.losses.train_step,
+    stochint.util_train.train_step,
     loss=loss_s_eval,
     model=model_s,
     optimizer=optimizer_s,

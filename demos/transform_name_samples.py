@@ -10,7 +10,7 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import optax
 import tqdm
-from stochint import losses, util_data
+from stochint import losses, util_data, util_train
 
 # Training parameters
 num_samples = 1_000_000
@@ -79,13 +79,13 @@ sample_rho1 = functools.partial(sample_nico, width=0.25)
 sample_rho0 = functools.partial(sample_marco, width=0.25)
 
 
-model_b = losses.MLP(
+model_b = util_train.MLP(
     output_dim=x_shape[0],
     num_layers=2,
     hidden_dim=40,
     act_fn=jax.nn.tanh,
 )
-model_s = losses.MLP(
+model_s = util_train.MLP(
     output_dim=x_shape[0],
     num_layers=2,
     hidden_dim=40,
@@ -157,7 +157,7 @@ def loss_s_eval(*a, **kw):
 optimizer_s = optax.adam(learning_rate_s)
 opt_state_s = optimizer_s.init(params_s)
 step_s_nonjit = functools.partial(
-    losses.train_step,
+    util_train.train_step,
     loss=loss_s_eval,
     model=model_s,
     optimizer=optimizer_s,
@@ -185,7 +185,7 @@ for epoch in pbar:
 optimizer_b = optax.adam(learning_rate_b)
 opt_state_b = optimizer_b.init(params_b)
 step_b_nonjit = functools.partial(
-    losses.train_step,
+    util_train.train_step,
     loss=loss_b_eval,
     model=model_b,
     optimizer=optimizer_b,
