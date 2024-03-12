@@ -1,7 +1,7 @@
 # Stochastic interpolants
 
 
-<img src="https://github.com/pnkraemer/mini-stochastic-interpolants/blob/main/name_sample_animation.gif" width="80" height="45" align="center" />
+<img src="https://github.com/pnkraemer/mini-stochastic-interpolants/blob/main/name_sample_animation.gif" width="400" height="225" align="center" />
 
 
 This repository contains a minimal implementation of some concepts related to stochastic interpolants in JAX, based on [this paper](https://arxiv.org/abs/2303.08797) by Michael S. Albergo, Nicholas M. Boffi, Eric Vanden-Eijnden.
