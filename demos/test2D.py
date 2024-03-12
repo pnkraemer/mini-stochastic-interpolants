@@ -3,7 +3,7 @@ from typing import Callable
 
 import flax.linen
 import imageio
-import imports
+from stochint import losses
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
@@ -45,21 +45,21 @@ sample_rho0 = functools.partial(sample_from_mean, mean=m0)
 sample_rho1 = functools.partial(sample_from_mean, mean=m1)
 
 
-model_b = imports.MLP(
+model_b = losses.MLP(
     output_dim=x_shape[0],
     num_layers=2,
     hidden_dim=20,
     act_fn=jax.nn.tanh,
 )
-model_s = imports.MLP(
+model_s = losses.MLP(
     output_dim=x_shape[0],
     num_layers=2,
     hidden_dim=20,
     act_fn=jax.nn.tanh,
 )
 
-# model_b = imports.Transformer()
-# model_s = imports.Transformer()
+# model_b = losses.Transformer()
+# model_s = losses.Transformer()
 
 
 def b_parametrized(t, x, p):
@@ -94,14 +94,14 @@ def gamma(t):
     return jnp.sqrt(alpha * t * (1 - t))
 
 
-loss_b = imports.make_loss_b(
+loss_b = losses.make_loss_b(
     big_i=big_i,
     gamma=gamma,
     b_parametrized=b_parametrized,
     sample_rho0=sample_rho0,
     sample_rho1=sample_rho1,
 )
-loss_s = imports.make_loss_s(
+loss_s = losses.make_loss_s(
     big_i=big_i,
     gamma=gamma,
     s_parametrized=s_parametrized,
@@ -130,7 +130,7 @@ def loss_s_eval(*a, **kw):
 optimizer_b = optax.adam(learning_rate_b)
 opt_state_b = optimizer_b.init(params_b)
 step_b_nonjit = functools.partial(
-    imports.train_step,
+    losses.train_step,
     loss=loss_b_eval,
     model=model_b,
     optimizer=optimizer_b,
@@ -159,7 +159,7 @@ for epoch in pbar:
 optimizer_s = optax.adam(learning_rate_s)
 opt_state_s = optimizer_s.init(params_s)
 step_s_nonjit = functools.partial(
-    imports.train_step,
+    losses.train_step,
     loss=loss_s_eval,
     model=model_s,
     optimizer=optimizer_s,
@@ -191,7 +191,7 @@ prng_key_init_x0s, prng_key_sde, prng_key = jax.random.split(prng_key, num=3)
 keys_init_x0s = jax.random.split(prng_key_init_x0s, num=num_generates)
 keys_sde = jax.random.split(prng_key_sde, num_generates)
 simulate_sde_single = functools.partial(
-    imports.solve_sde, dt=dt, b=b, s=s, epsilon_const=epsilon
+    losses.solve_sde, dt=dt, b=b, s=s, epsilon_const=epsilon
 )
 simulate_sde = jax.vmap(simulate_sde_single, out_axes=(None, 0))
 
@@ -203,7 +203,7 @@ x0s = jax.vmap(sample_rho0)(keys_init_x0s)
 # Plot the results
 plt.scatter(x0s[:, 0], x0s[:, 1], s=2)
 plt.scatter(x1_trajectories[:, -1, 0], x1_trajectories[:, -1, 1], s=2)
-plt.savefig("x1s.png")
+plt.savefig("figures_and_animations/x1s.png")
 
 pbar = tqdm.tqdm(range(int(1.0 / dt)))
 for i in pbar:
@@ -213,13 +213,13 @@ for i in pbar:
     )
     plt.xlim([-14, 14])
     plt.ylim([-14, 14])
-    plt.savefig(f"figures/step{i}.png")
+    plt.savefig(f"figures_and_animations/step{i}.png")
     plt.close()
     pbar.set_description(f"Plotting frame {i+1}/{int(1./dt)}")
 
 images = []
 for i in range(int(1.0 / dt)):
-    filename = f"figures/step{i}.png"
+    filename = f"figures_and_animations/step{i}.png"
     images.append(imageio.v2.imread(filename))
 imageio.mimsave("animation.gif", images, duration=2)
 
