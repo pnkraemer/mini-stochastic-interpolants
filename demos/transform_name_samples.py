@@ -8,7 +8,7 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import optax
 import tqdm
-from stochint import losses, util_data, util_train
+from stochint import losses, util_data, util_train, util_simulate
 
 # Training parameters
 num_samples = 1_000_000
@@ -218,7 +218,7 @@ prng_key_init_x0s, prng_key_sde, prng_key = jax.random.split(prng_key, num=3)
 keys_init_x0s = jax.random.split(prng_key_init_x0s, num=num_generates)
 keys_sde = jax.random.split(prng_key_sde, num_generates)
 simulate_sde_single = functools.partial(
-    losses.solve_sde, dt=dt, b=b, s=s, epsilon_const=epsilon
+    util_simulate.solve_sde, dt=dt, b=b, s=s, epsilon_const=epsilon
 )
 simulate_sde = jax.vmap(simulate_sde_single, out_axes=(None, 0))
 

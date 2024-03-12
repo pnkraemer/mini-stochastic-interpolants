@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import optax
 import stochint.losses
 import stochint.util_train
+import stochint.util_simulate
 import tqdm
 
 # Training parameters
@@ -188,7 +189,7 @@ prng_key_init_x0s, prng_key_sde, prng_key = jax.random.split(prng_key, num=3)
 keys_init_x0s = jax.random.split(prng_key_init_x0s, num=num_generates)
 keys_sde = jax.random.split(prng_key_sde, num_generates)
 simulate_sde_single = functools.partial(
-    stochint.losses.solve_sde, dt=dt, b=b, s=s, epsilon_const=1.0
+    stochint.util_simulate.solve_sde, dt=dt, b=b, s=s, epsilon_const=1.0
 )
 simulate_sde = jax.vmap(simulate_sde_single, out_axes=(None, 0))
 
@@ -209,7 +210,7 @@ plt.savefig("figures_and_animations/gaussian_mixture_1d.png")
 def f(log_epsilon, /):
     epsilon = 10**log_epsilon
     simulate_sde = functools.partial(
-        stochint.losses.solve_sde, dt=dt, b=b, s=s, epsilon_const=epsilon
+        stochint.util_simulate.solve_sde, dt=dt, b=b, s=s, epsilon_const=epsilon
     )
     trajectories = jax.vmap(simulate_sde, out_axes=(None, 0))(x0s, keys_sde)
     # shape (num_generate, num_timesteps, num_x_dim)
