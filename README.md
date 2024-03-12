@@ -11,9 +11,12 @@ For a more functional version (in Pytorch) see the repository published by the a
 
 ## Installation
 
-Before installing this project, you have to install JAX yourself, because CPU and GPU backends require different commands.
+Before installing this project, 
+and [after creating & activating your virtual environment](https://realpython.com/python-virtual-environments-a-primer/), 
+you have to install JAX yourself, because CPU and GPU backends require different installation commands.
 See [here](https://jax.readthedocs.io/en/latest/installation.html) for instructions.
-For the one-dimensional examples, `pip install jax[cpu]` will suffice. For the bigger demos, a GPU is helpful.
+For the one-dimensional examples, `pip install jax[cpu]` will suffice. 
+For the bigger demos, a GPU is helpful.
 
 
 Then, move to the root of the directory, and run
