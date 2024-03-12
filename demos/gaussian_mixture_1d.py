@@ -7,9 +7,9 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import optax
 import stochint.losses
-import stochint.util_train
-import stochint.util_simulate
 import stochint.util_plot
+import stochint.util_simulate
+import stochint.util_train
 import tqdm
 
 # Training parameters

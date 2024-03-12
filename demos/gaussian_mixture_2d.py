@@ -8,7 +8,7 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import optax
 import tqdm
-from stochint import losses, util_train, util_simulate
+from stochint import losses, util_simulate, util_train
 
 # Training parameters
 num_samples = 10

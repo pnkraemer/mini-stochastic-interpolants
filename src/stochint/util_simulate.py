@@ -1,6 +1,5 @@
 """Simulation utilities. Mainly ODE & SDE solvers."""
 
-
 import jax
 import jax.numpy as jnp
 
