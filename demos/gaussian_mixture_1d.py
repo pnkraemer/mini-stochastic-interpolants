@@ -9,6 +9,7 @@ import optax
 import stochint.losses
 import stochint.util_train
 import stochint.util_simulate
+import stochint.util_plot
 import tqdm
 
 # Training parameters
@@ -218,7 +219,6 @@ def f(log_epsilon, /):
     return t_trajectories, x1_trajectories[:, :, 0].T
 
 
-stochint.losses.slider(f, 0.0, name="log - Universal attention transport constant")
-plt.show()
+stochint.util_plot.slider(f, 0.0, name="log - Universal attention transport constant")
 
 print("Boomshakalaka")

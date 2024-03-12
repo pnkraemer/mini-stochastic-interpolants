@@ -1,14 +1,8 @@
 """Simulation utilities. Mainly ODE & SDE solvers."""
 
 
-
-from typing import Callable
-
 import jax
 import jax.numpy as jnp
-import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider
-
 
 
 def solve_ode(x0, *, b, dt):
