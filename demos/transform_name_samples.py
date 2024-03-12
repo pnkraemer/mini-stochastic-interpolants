@@ -3,24 +3,23 @@ from typing import Callable
 
 import flax.linen
 import imageio
-import imports
+from stochint import losses, util_data
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import optax
-import powerpoint
 import tqdm
 
 # Training parameters
-num_samples = 1_000_000  # 100_000
-num_epochs_b = 100_000
-num_epochs_s = 100_000
-learning_rate_b = 0.01  # 0.001
-learning_rate_s = 0.01  # 0.001
+num_samples = 3  # 1_000_000
+num_epochs_b = 3   # 100_000
+num_epochs_s = 3   # 100_000
+learning_rate_b = 0.1   # 0.01
+learning_rate_s = 0.1   # 0.01
 
 
 # Generation parameters
-num_generates = 10_000
+num_generates = 10  # 10_000
 dt = 0.01
 epsilon = 0.1
 
@@ -38,11 +37,11 @@ def sample_marco(key, *, width):
     m, a, r, c, o, key_idx = jax.random.split(key, num=6)
 
     # Generate points for each letter with adjusted parameters
-    marco_m_points = powerpoint.generate_m(m, width)
-    marco_a_points = powerpoint.generate_a(a, width)
-    marco_r_points = powerpoint.generate_r(r, width)
-    marco_c_points = powerpoint.generate_c(c, width)
-    marco_o_points = powerpoint.generate_o(o, width)
+    marco_m_points = util_data.generate_m(m, width)
+    marco_a_points = util_data.generate_a(a, width)
+    marco_r_points = util_data.generate_r(r, width)
+    marco_c_points = util_data.generate_c(c, width)
+    marco_o_points = util_data.generate_o(o, width)
 
     idx = jax.random.choice(key, jnp.arange(0, 5, step=1))
     word = jnp.stack(
@@ -62,10 +61,10 @@ def sample_nico(key, *, width):
     n, i, c, o, key_idx = jax.random.split(key, num=5)
 
     # Generate points for each letter with adjusted parameters
-    nico_n_points = powerpoint.generate_n(n, width)
-    nico_i_points = powerpoint.generate_i(i, width)
-    nico_c_points = powerpoint.generate_c(c, width)
-    nico_o_points = powerpoint.generate_o(o, width)
+    nico_n_points = util_data.generate_n(n, width)
+    nico_i_points = util_data.generate_i(i, width)
+    nico_c_points = util_data.generate_c(c, width)
+    nico_o_points = util_data.generate_o(o, width)
 
     idx = jax.random.choice(key, jnp.arange(0, 4, step=1))
     word = jnp.stack(
@@ -78,21 +77,18 @@ sample_rho1 = functools.partial(sample_nico, width=0.25)
 sample_rho0 = functools.partial(sample_marco, width=0.25)
 
 
-model_b = imports.MLP(
+model_b = losses.MLP(
     output_dim=x_shape[0],
-    num_layers=2,
-    hidden_dim=40,
+    num_layers=2,   # 2
+    hidden_dim=5,  # 40
     act_fn=jax.nn.tanh,
 )
-model_s = imports.MLP(
+model_s = losses.MLP(
     output_dim=x_shape[0],
-    num_layers=2,
-    hidden_dim=40,
+    num_layers=2,   # 2
+    hidden_dim=5,  # 40
     act_fn=jax.nn.tanh,
 )
-
-# model_b = imports.Transformer()
-# model_s = imports.Transformer()
 
 
 def b_parametrized(t, x, p):
@@ -127,23 +123,20 @@ def gamma(t):
     return jnp.sqrt(alpha * t * (1 - t))
 
 
-loss_b = imports.make_loss_b(
+loss_b = losses.make_loss_b(
     big_i=big_i,
     gamma=gamma,
     b_parametrized=b_parametrized,
     sample_rho0=sample_rho0,
     sample_rho1=sample_rho1,
 )
-loss_s = imports.make_loss_s(
+loss_s = losses.make_loss_s(
     big_i=big_i,
     gamma=gamma,
     s_parametrized=s_parametrized,
     sample_rho0=sample_rho0,
     sample_rho1=sample_rho1,
 )
-
-
-# todo: make these four lines a bit less horrible
 
 
 def loss_b_eval(*a, **kw):
@@ -164,7 +157,7 @@ def loss_s_eval(*a, **kw):
 optimizer_s = optax.adam(learning_rate_s)
 opt_state_s = optimizer_s.init(params_s)
 step_s_nonjit = functools.partial(
-    imports.train_step,
+    losses.train_step,
     loss=loss_s_eval,
     model=model_s,
     optimizer=optimizer_s,
@@ -192,7 +185,7 @@ for epoch in pbar:
 optimizer_b = optax.adam(learning_rate_b)
 opt_state_b = optimizer_b.init(params_b)
 step_b_nonjit = functools.partial(
-    imports.train_step,
+    losses.train_step,
     loss=loss_b_eval,
     model=model_b,
     optimizer=optimizer_b,
@@ -227,7 +220,7 @@ prng_key_init_x0s, prng_key_sde, prng_key = jax.random.split(prng_key, num=3)
 keys_init_x0s = jax.random.split(prng_key_init_x0s, num=num_generates)
 keys_sde = jax.random.split(prng_key_sde, num_generates)
 simulate_sde_single = functools.partial(
-    imports.solve_sde, dt=dt, b=b, s=s, epsilon_const=epsilon
+    losses.solve_sde, dt=dt, b=b, s=s, epsilon_const=epsilon
 )
 simulate_sde = jax.vmap(simulate_sde_single, out_axes=(None, 0))
 
@@ -239,7 +232,7 @@ x0s = jax.vmap(sample_rho0)(keys_init_x0s)
 # Plot the results
 plt.scatter(x0s[:, 0], x0s[:, 1], s=2)
 plt.scatter(x1_trajectories[:, -1, 0], x1_trajectories[:, -1, 1], s=2)
-plt.savefig("x1s.png")
+plt.savefig("figures_and_animations/transform_name_samples/x1s.png")
 
 pbar = tqdm.tqdm(range(int(1.0 / dt)))
 for i in pbar:
@@ -249,14 +242,14 @@ for i in pbar:
     )
     plt.xlim([0, 17])
     plt.ylim([0, 10])
-    plt.savefig(f"figures/step{i}.png")
+    plt.savefig(f"figures_and_animations/transform_name_samples/step{i}.png")
     plt.close()
     pbar.set_description(f"Plotting frame {i+1}/{int(1./dt)}")
 
 images = []
 for i in range(int(1.0 / dt)):
-    filename = f"figures/step{i}.png"
+    filename = f"figures_and_animations/transform_name_samples/step{i}.png"
     images.append(imageio.v2.imread(filename))
-imageio.mimsave("animation.gif", images, duration=2)
+imageio.mimsave("figures_and_animations/transform_name_samples/animation.gif", images, duration=2)
 
 print("Boomshakalaka")
