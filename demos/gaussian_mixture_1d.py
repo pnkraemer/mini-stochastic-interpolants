@@ -1,9 +1,7 @@
 """Transform a mixture of Gaussian distributions into a different mixture of Gaussian distributions in 1D."""
 
 import functools
-from typing import Callable
 
-import flax.linen
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt

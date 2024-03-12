@@ -1,9 +1,7 @@
 """Transform samples that write a name into samples that write a different name."""
 
 import functools
-from typing import Callable
 
-import flax.linen
 import imageio
 import jax
 import jax.numpy as jnp

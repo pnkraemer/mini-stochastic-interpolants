@@ -1,9 +1,7 @@
 """Transform a mixture of Gaussian distributions into a different mixture of Gaussian distributions in 2D."""
 
 import functools
-from typing import Callable
 
-import flax.linen
 import imageio
 import jax
 import jax.numpy as jnp

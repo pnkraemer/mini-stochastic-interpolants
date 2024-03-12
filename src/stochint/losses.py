@@ -2,12 +2,10 @@
 
 from typing import Callable
 
-import flax.linen
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
-import optax
-from matplotlib.widgets import Button, Slider
+from matplotlib.widgets import Slider
 
 
 def make_loss_b(*, big_i, gamma, b_parametrized, sample_rho0, sample_rho1):
